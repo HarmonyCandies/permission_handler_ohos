@@ -49,7 +49,7 @@ import 'package:device_info_plus_ohos/device_info_plus_ohos.dart';
 ## 请求单个权限
 
 ```dart
-    final PermissionStatusOhos statu =
+    final PermissionStatusOhos status =
         await PermissionHandlerOhos.requestPermission(
       PermissionOhos.read_calendar.name,
     );
