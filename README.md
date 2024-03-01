@@ -7,6 +7,7 @@ The plugin to request and check permissions on OpenHarmony.
 权限列表来自: https://gitee.com/openharmony/docs/blob/OpenHarmony-4.1-Beta1/zh-cn/application-dev/security/AccessToken/permissions-for-all.md
 
 - [permission\_handler\_ohos](#permission_handler_ohos)
+- [注意](#注意)
 - [使用](#使用)
 - [例子](#例子)
   - [检查权限状态](#检查权限状态)
@@ -14,6 +15,9 @@ The plugin to request and check permissions on OpenHarmony.
   - [请求多个权限](#请求多个权限)
   - [打开设置页面](#打开设置页面)
 
+# 注意
+
+由于 `OpenHarmony` 和 `HarmonyOS` 的权限差异以及鸿蒙版本的高速迭代，检查请求权限的 `api` 是传递的权限的字符串全称，如果你发现 `PermissionOhos` 枚举中没有某个权限，你可以直接传递权限的字符串全称。等鸿蒙版本稳定下来了，会再同步权限列表到枚举中。
 
 # 使用
 
