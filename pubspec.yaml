@@ -1,6 +1,6 @@
 name: permission_handler_ohos
 description: The plugin to request and check permissions on OpenHarmony.
-version: 0.0.3
+version: 0.0.4
 repository: https://github.com/harmonycandies/permission_handler_ohos
 topics:
   - permission-handler

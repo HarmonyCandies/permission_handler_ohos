@@ -5,7 +5,7 @@ import 'package:path/path.dart' as path;
 import 'package:dart_style/dart_style.dart';
 
 const String docUrl =
-    'https://gitee.com/openharmony/docs/blob/OpenHarmony-4.1-Beta1/zh-cn/application-dev/security/AccessToken/permissions-for-all.md';
+    'https://gitee.com/openharmony/docs/blob/OpenHarmony-4.1-Release/zh-cn/application-dev/security/AccessToken/permissions-for-all.md';
 
 Future<void> main(List<String> args) async {
   // var map = extractPermissionsAndComments(
@@ -22,7 +22,7 @@ Future<void> main(List<String> args) async {
     sb.writeln('''  ${p.document}
 $name(
 name: '${p.name}', 
-permissionLevel: '${p.permissionLevel}', 
+permissionLevel: '${p.permissionLevel.contains('normal') ? 'normal' : p.permissionLevel}', 
 grantType: '${p.grantType}',
 aclEnabled: ${p.aclEnabled}, 
 startVersion: ${p.startVersion},
@@ -36,7 +36,11 @@ startVersion: ${p.startVersion},
         // && p.grantType == 'user_grant'
         ) {
       // print(p.toString() + '\n');
-      sb1.writeln('{"name" :  "${p.name}"},');
+      if (p.grantType == 'user_grant') {
+        sb1.writeln(userGrantPermissionTemplate.replaceAll('{0}', p.name));
+      } else {
+        sb1.writeln('{"name" :  "${p.name}"},');
+      }
     }
   }
 
@@ -98,8 +102,13 @@ startVersion: ${p.startVersion},
   File moduleJson5File = File(
       path.join('example', 'ohos', 'entry', 'src/', 'main', 'module.json5'));
 
-  moduleJson5File
-      .writeAsStringSync(moduleJson5Template.replaceAll('{0}', sb1.toString()));
+  String moduleJson5Content =
+      moduleJson5Template.replaceAll('{0}', sb1.toString());
+  // moduleJson5Content = JSON5.stringify(moduleJson5Content, space: 2);
+  // moduleJson5Content = const JsonEncoder.withIndent('  ')
+  //     .convert(jsonDecode(moduleJson5Content));
+
+  moduleJson5File.writeAsStringSync(moduleJson5Content);
 }
 
 Map<String, String> extractPermissionsAndComments(String input) {
@@ -309,4 +318,17 @@ const String moduleJson5Template = '''
     ]
   }
 }
+''';
+
+String userGrantPermissionTemplate = '''
+      {
+        "name": "{0}",
+        "reason": "\$string:EntryAbility_label",
+        "usedScene": {
+          "abilities": [
+            "EntryAbility"
+          ],
+          "when": "inuse"
+        }
+      },
 ''';

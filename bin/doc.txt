@@ -78,6 +78,8 @@ ACL使能：true
 ohos.permission.ACCESS_NOTIFICATION_POLICY
 在本设备上允许应用访问通知策略。
 
+仅当控制铃声从静音到非静音时，需要申请该权限。
+
 权限级别：normal
 
 授权方式：system_grant
@@ -166,7 +168,7 @@ ACL使能：false
 ohos.permission.PRIVACY_WINDOW
 允许应用将窗口设置为隐私窗口，禁止截屏录屏
 
-权限级别：system_basic
+权限级别：API version 9-10为system_basic；从API version 11开始为normal。
 
 授权方式：system_grant
 
@@ -184,17 +186,6 @@ ohos.permission.PUBLISH_AGENT_REMINDER
 ACL使能：true
 
 起始版本：7
-
-ohos.permission.SET_NETWORK_INFO
-允许应用配置数据网络。
-
-权限级别：normal
-
-授权方式：system_grant
-
-ACL使能：true
-
-起始版本：8
 
 ohos.permission.SET_WIFI_INFO
 允许应用配置Wi-Fi设备。
@@ -339,6 +330,9 @@ ACL使能：false
 
 起始版本：11
 
+user_grant（用户授权）权限列表
+以下权限的授权方式均为user_grant（用户授权），申请方式请参考声明权限 > 向用户申请授权 。
+
 ohos.permission.ACCESS_BLUETOOTH
 允许应用接入蓝牙并使用蓝牙能力，例如配对、连接外围设备等。
 
@@ -408,8 +402,15 @@ ACL使能：true
 ohos.permission.LOCATION_IN_BACKGROUND
 允许应用在后台运行时获取设备位置信息。
 
-申请条件：需要先申请前台位置权限ohos.permission.LOCATION和ohos.permission.APPROXIMATELY_LOCATION后，才可申请此权限。
+由于安全隐私要求，应用不能通过弹窗的形式被授予后台位置权限，应用如果需要使用后台位置权限，需要引导用户到设置界面手动授予。
 
+申请流程：
+
+通过弹窗申请前台位置权限。存在两种允许情况：
+申请前台模糊位置权限：ohos.permission.APPROXIMATELY_LOCATION。
+申请前台精确位置权限：ohos.permission.APPROXIMATELY_LOCATION和ohos.permission.LOCATION。
+当用户点击弹窗授予前台位置权限后，应用通过弹窗、提示窗等形式告知用户前往设置界面授予后台位置权限。
+用户在设置界面中的选择“始终允许”应用访问位置信息权限，完成手动授予。
 权限级别：normal
 
 授权方式：user_grant

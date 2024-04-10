@@ -4,7 +4,7 @@
 
 The plugin to request and check permissions on OpenHarmony.
 
-权限列表来自: https://gitee.com/openharmony/docs/blob/OpenHarmony-4.1-Beta1/zh-cn/application-dev/security/AccessToken/permissions-for-all.md
+权限列表来自: https://gitee.com/openharmony/docs/blob/OpenHarmony-4.1-Release/zh-cn/application-dev/security/AccessToken/permissions-for-all.md
 
 - [permission\_handler\_ohos](#permission_handler_ohos)
 - [注意](#注意)
