@@ -1,6 +1,5 @@
-import FlutterEngine from '@ohos/flutter_ohos/src/main/ets/embedding/engine/FlutterEngine';
-import Log from '@ohos/flutter_ohos/src/main/ets/util/Log';
-import PermissionHandlerOhosPlugin from '@ohos/permission_handler_ohos'
+import { FlutterEngine, Log } from '@ohos/flutter_ohos';
+import PermissionHandlerOhosPlugin from 'permission_handler_ohos';
 
 /**
  * Generated file. Do not edit.

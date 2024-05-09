@@ -1,6 +1,6 @@
 name: permission_handler_ohos
 description: The plugin to request and check permissions on OpenHarmony.
-version: 0.0.5
+version: 0.0.6
 repository: https://github.com/harmonycandies/permission_handler_ohos
 topics:
   - permission-handler
@@ -42,7 +42,6 @@ flutter:
   plugin:
     platforms:
       ohos:
-        package: com.harmonycandies.permission_handler_ohos
         pluginClass: PermissionHandlerOhosPlugin
 
   # To add assets to your plugin package, add an assets section, like this:

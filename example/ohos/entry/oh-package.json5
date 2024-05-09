@@ -1,11 +1,11 @@
 {
-  name: 'entry',
-  version: '1.0.0',
-  description: 'Please describe the basic information.',
-  main: '',
-  author: '',
-  license: '',
-  dependencies: {
-    '@ohos/permission_handler_ohos': 'file:./har/permission_handler_ohos.har',
-  },
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "",
+  "author": "",
+  "license": "",
+  "dependencies": {
+    "permission_handler_ohos": "file:../har/permission_handler_ohos.har"
+  }
 }
