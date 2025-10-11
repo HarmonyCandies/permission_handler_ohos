@@ -70,10 +70,10 @@ export default class PermissionHandlerOhosPlugin implements FlutterPlugin, Metho
       }
       let applicationInfo = this.context!.applicationInfo;
       let wantInfo: Want = {
-        action: 'action.settings.app.info',
-        parameters: {
-          settingsParamBundleName: applicationInfo.name
-        }
+          bundleName: 'com.huawei.hmos.settings',
+          abilityName: 'com.huawei.hmos.settings.MainAbility',
+          uri: 'application_info_entry',
+          parameters: applicationInfo.name
       }
       
       this.uiContext!.startAbility(wantInfo).then(() => {

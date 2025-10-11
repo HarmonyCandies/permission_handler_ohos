@@ -1,3 +1,7 @@
+## 0.0.7
+
+* Fix Open Setting
+
 ## 0.0.6
 
 * Update plugin structure
