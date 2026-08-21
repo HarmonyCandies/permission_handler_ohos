@@ -79,9 +79,9 @@ export default class PermissionHandlerOhosPlugin implements FlutterPlugin, Metho
       }
       
       this.uiContext!.startAbility(wantInfo).then(() => {
-        result.success(true);
+        completeOpenAppSettings(result, null);
       }).catch((err: BusinessError) => {
-        console.error(`openAppSettings failed, code is ${err.code}, message is ${err.message}`);
+        completeOpenAppSettings(result, err);
       })
 
     }
@@ -111,9 +111,9 @@ export default class PermissionHandlerOhosPlugin implements FlutterPlugin, Metho
           for (let i = 0; i < length; i++) {
             results.set(permissions[i], grantStatus[i]);
           }
-          result.success(results)
+          completeRequestPermissions(result, results, null);
         }).catch((err: BusinessError) => {
-          console.error(`requestPermissionsFromUser failed, code is ${err.code}, message is ${err.message}`);
+          completeRequestPermissions(result, null, err);
         })
       } else {
         result.error('102', 'permissions is not List<String>', 'make sure you pass the right permissions');
@@ -123,5 +123,39 @@ export default class PermissionHandlerOhosPlugin implements FlutterPlugin, Metho
       result.notImplemented()
     }
   }
+}
+
+/**
+ * Completes MethodResult for openAppSettings.
+ *
+ * Plus permission_handler contract: true if settings opened, false on
+ * startAbility failure. Catch must not leave MethodResult pending (Dart hang).
+ */
+function completeOpenAppSettings(result: MethodResult, err: BusinessError | null): void {
+  if (err == null) {
+    result.success(true);
+    return;
+  }
+  console.error(`openAppSettings failed, code is ${err.code}, message is ${err.message}`);
+  result.success(false);
+}
+
+/**
+ * Completes MethodResult for requestPermissions.
+ *
+ * Success replies with the grant map. Catch calls result.error (same pattern
+ * as geolocator_ohos settings) so the Dart Future completes instead of hanging.
+ */
+function completeRequestPermissions(
+  result: MethodResult,
+  results: HashMap<string, number> | null,
+  err: BusinessError | null
+): void {
+  if (err == null) {
+    result.success(results);
+    return;
+  }
+  console.error(`requestPermissionsFromUser failed, code is ${err.code}, message is ${err.message}`);
+  result.error(err.code.toString(), 'requestPermissionsFromUser failed', err.message);
 }
 
