@@ -1,3 +1,8 @@
+## 0.0.9
+
+* Complete MethodResult in `openAppSettings` and `requestPermissions` catch
+  paths so Dart Futures no longer hang.
+
 ## 0.0.8
 
 * Fix Open Setting
