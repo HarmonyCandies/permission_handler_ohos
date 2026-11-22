@@ -1,127 +1,100 @@
-import {
-  FlutterPlugin,
-  FlutterPluginBinding
-} from '@ohos/flutter_ohos/src/main/ets/embedding/engine/plugins/FlutterPlugin';
-import MethodChannel, {
-  MethodCallHandler,
-  MethodResult
-} from '@ohos/flutter_ohos/src/main/ets/plugin/common/MethodChannel';
+import { FlutterPlugin, FlutterPluginBinding } from '@ohos/flutter_ohos/src/main/ets/embedding/engine/plugins/FlutterPlugin';
+import MethodChannel, { MethodCallHandler, MethodResult } from '@ohos/flutter_ohos/src/main/ets/plugin/common/MethodChannel';
 import MethodCall from '@ohos/flutter_ohos/src/main/ets/plugin/common/MethodCall';
-import Want from '@ohos.app.ability.Want';
 import AbilityAware from '@ohos/flutter_ohos/src/main/ets/embedding/engine/plugins/ability/AbilityAware';
-import {
-  AbilityPluginBinding
-} from '@ohos/flutter_ohos/src/main/ets/embedding/engine/plugins/ability/AbilityPluginBinding';
-import common from '@ohos.app.ability.common';
+import { AbilityPluginBinding } from '@ohos/flutter_ohos/src/main/ets/embedding/engine/plugins/ability/AbilityPluginBinding';
+import { common, Want } from '@kit.AbilityKit';
 import abilityAccessCtrl, { Permissions } from '@ohos.abilityAccessCtrl';
-import { HashMap } from '@kit.ArkTS';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { notificationManager } from '@kit.NotificationKit';
 
-/** PermissionHandlerOhosPlugin **/
 export default class PermissionHandlerOhosPlugin implements FlutterPlugin, MethodCallHandler, AbilityAware {
   private channel: MethodChannel | null = null;
   private context: Context | null = null;
   private uiContext: common.UIAbilityContext | null = null;
 
-  constructor() {
-  }
+  getUniqueClassName(): string { return 'PermissionHandlerPlugin'; }
 
   onAttachedToAbility(binding: AbilityPluginBinding): void {
     this.uiContext = binding.getAbility().context;
   }
 
-  onDetachedFromAbility(): void {
-
-  }
-
-  getUniqueClassName(): string {
-    return "PermissionHandlerPlugin"
-  }
+  onDetachedFromAbility(): void { this.uiContext = null; }
 
   onAttachedToEngine(binding: FlutterPluginBinding): void {
-    this.channel = new MethodChannel(binding.getBinaryMessenger(), "com.harmonycandies.permission_handler_ohos");
-    this.channel.setMethodCallHandler(this)
+    this.channel = new MethodChannel(binding.getBinaryMessenger(), 'com.harmonycandies.permission_handler_ohos');
+    this.channel.setMethodCallHandler(this);
     this.context = binding.getApplicationContext();
   }
 
   onDetachedFromEngine(binding: FlutterPluginBinding): void {
-    if (this.channel != null) {
-      this.channel.setMethodCallHandler(null)
-    }
+    this.channel?.setMethodCallHandler(null);
+    this.channel = null;
+    this.context = null;
+    this.uiContext = null;
   }
 
   async onMethodCall(call: MethodCall, result: MethodResult): Promise<void> {
-    if (call.method == "checkPermissionStatus") {
-      if (this.context == null) {
-        result.error('100', 'context is null', 'it should not be null');
+    try {
+      if (call.method === 'areNotificationsEnabled') {
+        result.success(await notificationManager.isNotificationEnabled());
         return;
       }
-      let args: ESObject = call.args;
-      let atManager = abilityAccessCtrl.createAtManager();
-      let grantStatus: abilityAccessCtrl.GrantStatus = await atManager.checkAccessToken(this.context!
-        .applicationInfo
-        .accessTokenId, args as Permissions,);
-      result.success(grantStatus)
-    }
-    else if (call.method == "openAppSettings") {
-      if (this.context == null || this.uiContext == null) {
-        result.error('100', 'context and uiContext are null', 'They should not be null');
+      if (call.method === 'checkPermissionStatus') {
+        if (this.context == null) {
+          result.error('no_context', 'The plugin must be attached to an engine.', null);
+          return;
+        }
+        const status = await abilityAccessCtrl.createAtManager().checkAccessToken(
+          this.context.applicationInfo.accessTokenId, call.args as Permissions);
+        result.success(status);
         return;
       }
-      let applicationInfo = this.context!.applicationInfo;
-      let wantInfo: Want = {
+      if (call.method !== 'openAppSettings' && call.method !== 'requestPermissions' &&
+        call.method !== 'requestNotificationPermission') {
+        result.notImplemented();
+        return;
+      }
+      const context = this.uiContext;
+      if (context == null) {
+        result.error('no_activity', 'A foreground UIAbility is required.', null);
+        return;
+      }
+      if (call.method === 'requestNotificationPermission') {
+        if (!await notificationManager.isNotificationEnabled()) {
+          await notificationManager.requestEnableNotification(context);
+        }
+        result.success(await notificationManager.isNotificationEnabled());
+      } else if (call.method === 'openAppSettings') {
+        const want: Want = {
           bundleName: 'com.huawei.hmos.settings',
           abilityName: 'com.huawei.hmos.settings.MainAbility',
           uri: 'application_info_entry',
-          parameters: {
-              pushParams : applicationInfo.name
-          }
-      }
-      
-      this.uiContext!.startAbility(wantInfo).then(() => {
+          parameters: { pushParams: context.applicationInfo.name }
+        };
+        await context.startAbility(want);
         result.success(true);
-      }).catch((err: BusinessError) => {
-        console.error(`openAppSettings failed, code is ${err.code}, message is ${err.message}`);
-      })
-
-    }
-    else if (call.method == "requestPermissions") {
-      let args: ESObject = call.args;
-
-      if (this.uiContext == null) {
-        result.error('100', 'uiContext is null', 'it should not be null');
-        return;
-      }
-
-      if (Array.isArray(args)) {
-        let results: HashMap<string, number> = new  HashMap<string, number>();
-        // requestPermissionsFromUser
-        let permissions: Array<Permissions> = [];
-        permissions.push(...args);
-
-        if (permissions.length == 0) {
-          result.error('101', 'permissions is empty', 'make sure you pass the permissions');
+      } else {
+        const args: ESObject = call.args;
+        if (!Array.isArray(args) || args.length === 0) {
+          result.error('invalid_permissions', 'Pass a non-empty list of OHOS permission names.', null);
           return;
         }
-
-        let atManager = abilityAccessCtrl.createAtManager();
-        atManager.requestPermissionsFromUser(this.uiContext, permissions).then((data) => {
-          let grantStatus: Array<number> = data.authResults;
-          let length: number = grantStatus.length;
-          for (let i = 0; i < length; i++) {
-            results.set(permissions[i], grantStatus[i]);
-          }
-          result.success(results)
-        }).catch((err: BusinessError) => {
-          console.error(`requestPermissionsFromUser failed, code is ${err.code}, message is ${err.message}`);
-        })
-      } else {
-        result.error('102', 'permissions is not List<String>', 'make sure you pass the right permissions');
+        const permissions = args as Permissions[];
+        const response = await abilityAccessCtrl.createAtManager().requestPermissionsFromUser(context, permissions);
+        const statuses = new Map<string, number>();
+        for (let i = 0; i < permissions.length; i++) {
+          statuses.set(permissions[i], response.authResults[i]);
+        }
+        result.success(statuses);
       }
-    }
-    else {
-      result.notImplemented()
+    } catch (error) {
+      const failure = error as BusinessError;
+      if (call.method === 'requestNotificationPermission' && failure.code === 1600004) {
+        result.success(false);
+      } else {
+        result.error(String(failure.code), failure.message, null);
+      }
     }
   }
 }
-

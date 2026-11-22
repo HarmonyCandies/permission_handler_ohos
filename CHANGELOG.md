@@ -1,3 +1,10 @@
+## Unreleased
+
+* Register an OHOS implementation of the standard permission_handler API.
+* Support notification authorization through notificationManager.
+* Complete failed native requests with errors and release detached UI contexts.
+* Support Dart 3.
+
 ## 0.0.8
 
 * Fix Open Setting

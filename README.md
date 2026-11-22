@@ -4,6 +4,25 @@
 
 The plugin to request and check permissions on OpenHarmony.
 
+## Standard permission_handler API
+
+Add this package alongside `permission_handler`. The OHOS Dart registrant
+registers the platform implementation automatically, so `Permission.camera`,
+`Permission.microphone`, `Permission.notification` and the supported location,
+Bluetooth, activity and calendar permissions use the OHOS APIs. The existing
+string-based API remains available for OHOS-specific permissions.
+
+`Permission.scheduleExactAlarm` checks the install-time
+`ohos.permission.PUBLISH_AGENT_REMINDER` declaration; OHOS has no Android-style
+exact-alarm consent page. `Permission.ignoreBatteryOptimizations` has no
+equivalent runtime authorization and returns `restricted`. Unknown mappings
+also return `restricted`. Service queries return `notApplicable`.
+
+Declare the mapped permissions in the host's `module.json5`; notification
+authorization uses `notificationManager.requestEnableNotification` instead
+of the access-token permission dialog. Platform failures complete with a
+`PlatformException` so callers can report an error and remain responsive.
+
 权限列表来自: https://gitee.com/openharmony/docs/blob/OpenHarmony-4.1-Release/zh-cn/application-dev/security/AccessToken/permissions-for-all.md
 
 - [permission\_handler\_ohos](#permission_handler_ohos)
